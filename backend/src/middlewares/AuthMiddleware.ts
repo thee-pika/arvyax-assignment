@@ -7,8 +7,8 @@ export const AuthMiddleware = async (req: Request, res: Response, next: NextFunc
         const token = req.headers.authorization?.split(" ")[1];
 
         if (!token) {
-             res.status(401).json({ error: "Unauthorized! TOKEN IS REQUIRED" });
-             return
+            res.status(401).json({ error: "Unauthorized! TOKEN IS REQUIRED" });
+            return
         }
 
         const secret = process.env.JWT_SECRET as string;
@@ -27,6 +27,7 @@ export const AuthMiddleware = async (req: Request, res: Response, next: NextFunc
         req.user = decoded.user;
         next();
     } catch (error) {
+        console.log("authentication failed,", error)
         res.status(500).json({ error: "Internal server error" });
     }
 }

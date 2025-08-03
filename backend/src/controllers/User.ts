@@ -3,15 +3,16 @@ import { loginSchema, registerSchema } from "../types";
 import prisma from "../lib/db";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { config } from "dotenv";
+config();
 
 const createAccount = async (req: Request, res: Response) => {
     try {
-        console.log("req came .................")
-        console.log("req.body", req.body);
+ 
         const parsedData = await registerSchema.safeParse(req.body);
 
         if (!parsedData.success) {
-            res.status(400).json({ error: parsedData.error.message });
+            res.status(400).json({ success: false, error: parsedData.error.message });
             return
         }
 
@@ -20,12 +21,12 @@ const createAccount = async (req: Request, res: Response) => {
         });
 
         if (user) {
-            res.status(401).json({ error: "User Already exists" });
+            res.status(401).json({ success: false, error: "User Already exists" });
             return
         }
 
         const hashedPassword = await bcrypt.hash(parsedData.data.password, 10);
-        
+
         const newUser = await prisma.user.create({
             data: {
                 ...parsedData.data,
@@ -33,19 +34,19 @@ const createAccount = async (req: Request, res: Response) => {
             },
         });
 
-        res.status(201).json({ message: "User created successfully", newUser });
+        res.status(201).json({ success: true, message: "User created successfully", newUser });
     } catch (error) {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ success: false, error: "Internal server error" });
     }
 };
 
 const Login = async (req: Request, res: Response) => {
     try {
-        console.log("req.came", req.body)
+     
         const parsedData = await loginSchema.safeParse(req.body);
 
         if (!parsedData.success) {
-            res.status(400).json({ error: parsedData.error.message });
+            res.status(400).json({ success: false, error: parsedData.error.message });
             return
         }
 
@@ -54,26 +55,24 @@ const Login = async (req: Request, res: Response) => {
         });
 
         if (!user) {
-            res.status(401).json({ error: "User Not found" });
+            res.status(401).json({ success: false, error: "User Not found" });
             return
         }
 
         const isPasswordValid = await bcrypt.compare(parsedData.data.password, user.password);
 
         if (!isPasswordValid) {
-            res.status(401).json({ error: "Invalid credentials" });
+            res.status(401).json({ success : false, error: "Invalid credentials" });
             return
         }
 
         const token = await jwt.sign({ user }, process.env.JWT_SECRET as string, { expiresIn: "2h" });
 
-        res.status(200).json({ message: "Login successful", token });
+        res.status(200).json({ success: true, message: "Login successful", token , user });
     } catch (error) {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ success: false, error: "Internal server error" });
     }
 };
-
-
 
 export { createAccount, Login };
 

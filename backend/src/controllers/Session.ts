@@ -1,19 +1,20 @@
 import prisma from "../lib/db"
 import { createSessionSchema } from "../types";
 import { Request, Response } from "express";
+import { uploadImageToCloudinary } from "../utils/imageUpload";
 
 const createSession = async (req: Request, res: Response) => {
-    try {
-        console.log("im in",req.body);
+        try {
+          
         const parsedData = createSessionSchema.safeParse(req.body);
         if (!parsedData.success) {
-            return res.status(400).json({ error: parsedData.error.message });
+            return res.status(400).json({ success: false, error: parsedData.error.message });
         }
 
         const user = req.user;
 
         if (!user) {
-            res.status(401).json({ error: "Unauthorized! TOKEN IS REQUIRED" });
+            res.status(401).json({ success: false, error: "Unauthorized! TOKEN IS REQUIRED" });
             return;
         }
         const session = await prisma.session.create({
@@ -26,35 +27,48 @@ const createSession = async (req: Request, res: Response) => {
             }
         })
 
-        res.status(201).json({ message: "Session created successfully", session });
+        res.status(201).json({ success: true, message: "Session created successfully", session });
     } catch (error) {
-        
+
+    }
+}
+
+const uploadJsonToCloud = async (req: Request, res: Response) => {
+    try {
+        if (!req.file) {
+            res.status(400).json({
+                error: "Avatar is required"
+            });
+            return;
+        }
+
+        const result = await uploadImageToCloudinary(req.file.buffer);
+
+        const { url, id } = JSON.parse(result);
+        res.json({ success: true, fileUrl: url, fileId: id })
+    } catch (error) {
+        res.status(500).json({ success: false, error: "Internal server error" });
     }
 }
 
 const getSessions = async (req: Request, res: Response) => {
     try {
-        const user = req.user;
-
-        if (!user) {
-            res.status(401).json({ error: "Unauthorized! TOKEN IS REQUIRED" });
-            return;
-        }
 
         const sessions = await prisma.session.findMany({});
 
-        res.status(200).json({ sessions });
+        res.status(200).json({ success: true, sessions });
     } catch (error) {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ success: false, error: "Internal server error" });
     }
 }
 
 const getUserSessions = async (req: Request, res: Response) => {
     try {
+     
         const user = req.user;
 
         if (!user) {
-            res.status(401).json({ error: "Unauthorized! TOKEN IS REQUIRED" });
+            res.status(401).json({ success: false, error: "Unauthorized! TOKEN IS REQUIRED" });
             return;
         }
 
@@ -67,9 +81,10 @@ const getUserSessions = async (req: Request, res: Response) => {
             },
         })
 
-        res.status(200).json({ sessions });
+        res.status(200).json({ success: true, sessions });
     } catch (error) {
-        res.status(500).json({ error: "Internal server error" });
+        console.log("error", error);
+        res.status(500).json({ success: false, error });
     }
 }
 
@@ -79,7 +94,7 @@ const getSession = async (req: Request, res: Response) => {
         const { id } = req.params;
 
         if (!id) {
-            res.status(400).json({ error: "Session ID is required" });
+            res.status(400).json({ success: false, error: "Session ID is required" });
             return;
         }
 
@@ -90,14 +105,14 @@ const getSession = async (req: Request, res: Response) => {
         })
 
         if (!session) {
-            res.status(404).json({ error: "Session not found" });
+            res.status(404).json({ success: false, error: "Session not found" });
             return;
         }
 
         res.status(200).json({ session });
 
     } catch (error) {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ success: false, error: "Internal server error" });
     }
 }
 
@@ -106,7 +121,7 @@ const updateSession = async (req: Request, res: Response) => {
         const { id } = req.params;
 
         if (!id) {
-            res.status(400).json({ error: "Session ID is required" });
+            res.status(400).json({ success: false, error: "Session ID is required" });
             return;
         }
 
@@ -117,7 +132,7 @@ const updateSession = async (req: Request, res: Response) => {
         })
 
         if (!session) {
-            res.status(404).json({ error: "Session not found" });
+            res.status(404).json({ success: false, error: "Session not found" });
             return;
         }
         const updatedSession = await prisma.session.update({
@@ -127,7 +142,7 @@ const updateSession = async (req: Request, res: Response) => {
             data: req.body,
         })
 
-        res.status(200).json({ message: "Session updated successfully", updatedSession });
+        res.status(200).json({ success: true, message: "Session updated successfully", updatedSession });
 
     } catch (error) {
         res.status(500).json({ error: "Internal server error" });
@@ -138,7 +153,7 @@ const deleteSession = async (req: Request, res: Response) => {
     try {
         const { id } = req.params;
         if (!id) {
-            res.status(400).json({ error: "Session ID is required" });
+            res.status(400).json({ success: false, error: "Session ID is required" });
             return;
         }
 
@@ -149,7 +164,7 @@ const deleteSession = async (req: Request, res: Response) => {
         })
 
         if (!session) {
-            res.status(404).json({ error: "Session not found" });
+            res.status(404).json({ success: false, error: "Session not found" });
             return;
         }
 
@@ -159,11 +174,11 @@ const deleteSession = async (req: Request, res: Response) => {
             }
         })
 
-        res.status(200).json({ message: "Session deleted successfully" });
+        res.status(200).json({ success: true, message: "Session deleted successfully" });
     } catch (error) {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ success: false, error: "Internal server error" });
     }
 }
 
-export { createSession, getSessions, getSession, updateSession, deleteSession , getUserSessions};
+export { createSession, getSessions, getSession, updateSession, deleteSession, getUserSessions, uploadJsonToCloud };
 

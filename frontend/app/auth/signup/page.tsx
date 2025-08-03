@@ -1,14 +1,17 @@
 'use client';
 
-import Image from 'next/image';
+import UserService from '@/app/services/User';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import Image from 'next/image';
 import Link from 'next/link';
-import axios from "axios";
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function SignupPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -24,9 +27,15 @@ export default function SignupPage() {
     try {
       e.preventDefault();
       console.log(formData);
-      setLoading(true)
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URI}/api/user/register`, formData)
-      console.log("res came eeeeeeeeeeeeeeeee", res);
+      setLoading(true);
+      const res = await UserService.register(formData)
+
+      if (res.data.success) {
+        toast.success("Account created Successfully!!");
+        setTimeout(() => {
+          router.push("/auth/login");
+        })
+      }
     } catch (error) {
       console.log("error", error)
     } finally {
@@ -45,7 +54,6 @@ export default function SignupPage() {
           className="object-cover"
         />
       </div>
-
 
       <div className="flex items-center justify-center md:w-1/2 w-full p-8">
         <form
@@ -92,8 +100,8 @@ export default function SignupPage() {
             />
           </div>
 
-          <Button type="submit" className="w-full bg-[#13361C] p-6">
-            Sign Up
+          <Button type="submit" className="w-full bg-[#13361C] p-6" disabled={loading}>
+            {loading ? "loading" : " Sign Up"}
           </Button>
 
           <p className="text-center text-sm text-gray-600 mt-4">
@@ -107,3 +115,5 @@ export default function SignupPage() {
     </div>
   );
 }
+
+

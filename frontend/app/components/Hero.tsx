@@ -1,9 +1,18 @@
+"use client";
 import Image from 'next/image';
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { Michroma } from 'next/font/google';
+import useAuth from '../hooks/useAuth';
+
+const michroma = Michroma({
+  subsets: ['latin'],
+  weight: '400',
+});
 
 const Hero = () => {
+  const { user } = useAuth();
   return (
     <div className="relative w-full h-screen">
       <Image
@@ -14,36 +23,36 @@ const Hero = () => {
         priority
       />
 
-      <div className="absolute inset-0 bg-black opacity-60 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70 z-10" />
 
-      <div className="absolute inset-0 flex justify-between items-start mt-10 text-white z-20 px-4">
-        <div className="flex items-center gap-2 w-1/4 ml-8">
-          <Image src="/icon.png" alt="logo" width={50} height={50} />
-          <h1 className="font-bold text-3xl">Verdantia</h1>
-        </div>
-        <div className="flex text-white justify-evenly text-xl w-1/4">
-          <span className="p-4 hover:underline cursor-pointer">Home</span>
-          <span className="p-4 hover:underline cursor-pointer">About</span>
-          <span className="p-4 hover:underline cursor-pointer">Contact</span>
-          <span className="p-4 hover:underline cursor-pointer">App</span>
-        </div>
-        <div className="flex text-white justify-evenly font-bold text-xl w-1/4">
-          <span className="p-4 hover:underline cursor-pointer">Login</span>
-        </div>
-      </div>
+      <div className="absolute inset-0 flex justify-center items-center z-20 px-4">
+        <div className="backdrop-blur-md bg-white/10 rounded-2xl p-8 md:p-16 max-w-4xl text-center text-white shadow-2xl">
+          <h1 className={`text-4xl md:text-6xl font-extrabold mb-6 leading-snug ${michroma.className}`}>
+            Connect with Nature Freely<br className="hidden md:block" />Anywhere, Anytime
+          </h1>
+          <p className="text-lg md:text-xl mb-4 opacity-90 leading-relaxed">
+            With us, you can experience the true essence of yoga without hassle.
+            We make the impossible possible — with cutting-edge technology, you're free
+            to connect with nature from your comfort zone.
+          </p>
+          <p className="text-base md:text-lg mb-8 italic tracking-wide opacity-80">
+            Slow Down, Just Breathe.
+          </p>
+          {
+            user ?
+              <Link href={"/session/my"} className='flex justify-center'>
+                <button className="bg-green-700 hover:bg-green-800 hover:scale-105 transition-all duration-300 px-10 py-4 flex items-center gap-3 rounded-full text-white font-semibold text-lg shadow-xl">
+                  Get Started <ArrowRight size={20} />
+                </button>
+              </Link>
+              : <Link href={"/auth/login"} className='flex justify-center'>
+                <button className="bg-green-700 hover:bg-green-800 hover:scale-105 transition-all duration-300 px-10 py-4 flex items-center gap-3 rounded-full text-white font-semibold text-lg shadow-xl">
+                  Get Started <ArrowRight size={20} />
+                </button>
+              </Link>
+          }
 
-      <div className="absolute inset-0 flex flex-col justify-center items-center text-white z-20 text-center px-4">
-        <h1 className="text-4xl md:text-6xl font-bold mb-4">Embrace Nature</h1>
-        <p className="text-lg md:text-2xl max-w-2xl">
-          Discover the beauty and serenity of the natural world. Breathe in the
-          fresh air, listen to the rustling leaves, and reconnect with the earth.
-        </p>
-        <Link href={"/auth/login"}>
-          <button className="bg-[#052E16] hover:bg-green-900 transition mt-6 px-20 py-4 cursor-pointer flex rounded-3xl text-white font-semibold text-xl shadow-lg">
-            <span className='mr-4'> Get Started </span>
-            <ArrowRight />
-          </button>
-        </Link>
+        </div>
       </div>
     </div>
   );

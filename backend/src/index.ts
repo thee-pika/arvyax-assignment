@@ -9,6 +9,7 @@ config();
 const app: Express = express();
 const PORT = process.env.PORT || 5000; 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 app.use(cors());
 

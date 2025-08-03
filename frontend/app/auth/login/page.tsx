@@ -1,14 +1,20 @@
 'use client';
 
-import Image from 'next/image';
+import useAuth from '@/app/hooks/useAuth';
+import UserService from '@/app/services/User';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { Toaster } from '@/components/ui/sonner';
+import Image from 'next/image';
 import Link from 'next/link';
-import axios from 'axios';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
+  const { login } = useAuth();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [credentials, setCredentials] = useState({
     email: '',
@@ -22,11 +28,19 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     try {
       e.preventDefault();
-      console.log(credentials);
+   
       setLoading(true);
 
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URI}/api/user/login`, credentials)
-      console.log("res", res);
+      const res = await UserService.login(credentials);
+     
+      if (res.data.success) {
+        const { token, user } = res.data;
+        await login(token, user)
+        toast.success("Login Successful!!");
+        setTimeout(() => {
+          router.push("/")
+        }, 1000);
+      }
     } catch (error) {
       console.log("error", error)
     } finally {
@@ -36,16 +50,15 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col md:flex-row h-screen w-full bg-[#374c3c]">
-      {/* Left side image */}
+
       <div className="relative md:w-1/2 w-full h-64 md:h-full">
         <Image
-          src="/yoga.jpg" // replace with your login image path
+          src="/yoga.jpg"
           alt="Login Visual"
           fill
           className="object-cover"
         />
       </div>
-
 
       <div className="flex items-center justify-center md:w-1/2 w-full p-8">
         <form
@@ -80,8 +93,8 @@ export default function LoginPage() {
             />
           </div>
 
-          <Button type="submit" className="w-full bg-[#13361C] p-6">
-            LogIn
+          <Button type="submit" className="w-full bg-[#13361C] p-6" disabled={loading}>
+            {loading ? "loading" : "LogIn"}
           </Button>
 
           <p className="text-center text-sm text-gray-600 mt-4">
@@ -92,6 +105,8 @@ export default function LoginPage() {
           </p>
         </form>
       </div>
+      <Toaster />
     </div>
   );
 }
+
