@@ -36,7 +36,7 @@ const Header = () => {
                                 className="text-xl font-bold flex gap-2 cursor-pointer hover:text-[#E3EFD3] transition-colors"
                             >
                                 <Image src="/icon.png" alt="logo" width={40} height={40} />
-                                <span className='flex items-center'>Wellness Platform</span>
+                                <span className='flex items-center'>Verdentia</span>
                             </h1>
                         </Link>
                     </div>
