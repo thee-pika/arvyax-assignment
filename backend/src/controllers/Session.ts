@@ -4,8 +4,8 @@ import { Request, Response } from "express";
 import { uploadImageToCloudinary } from "../utils/imageUpload";
 
 const createSession = async (req: Request, res: Response) => {
-        try {
-          
+    try {
+
         const parsedData = createSessionSchema.safeParse(req.body);
         if (!parsedData.success) {
             return res.status(400).json({ success: false, error: parsedData.error.message });
@@ -29,7 +29,7 @@ const createSession = async (req: Request, res: Response) => {
 
         res.status(201).json({ success: true, message: "Session created successfully", session });
     } catch (error) {
-
+        res.status(500).json({ success: false, error });
     }
 }
 
@@ -47,7 +47,7 @@ const uploadJsonToCloud = async (req: Request, res: Response) => {
         const { url, id } = JSON.parse(result);
         res.json({ success: true, fileUrl: url, fileId: id })
     } catch (error) {
-        res.status(500).json({ success: false, error: "Internal server error" });
+        res.status(500).json({ success: false, error });
     }
 }
 
@@ -58,13 +58,13 @@ const getSessions = async (req: Request, res: Response) => {
 
         res.status(200).json({ success: true, sessions });
     } catch (error) {
-        res.status(500).json({ success: false, error: "Internal server error" });
+        res.status(500).json({ success: false, error });
     }
 }
 
 const getUserSessions = async (req: Request, res: Response) => {
     try {
-     
+
         const user = req.user;
 
         if (!user) {
@@ -112,7 +112,7 @@ const getSession = async (req: Request, res: Response) => {
         res.status(200).json({ session });
 
     } catch (error) {
-        res.status(500).json({ success: false, error: "Internal server error" });
+        res.status(500).json({ success: false, error });
     }
 }
 
@@ -145,7 +145,7 @@ const updateSession = async (req: Request, res: Response) => {
         res.status(200).json({ success: true, message: "Session updated successfully", updatedSession });
 
     } catch (error) {
-        res.status(500).json({ error: "Internal server error" });
+        res.status(500).json({ error });
     }
 }
 
@@ -176,7 +176,7 @@ const deleteSession = async (req: Request, res: Response) => {
 
         res.status(200).json({ success: true, message: "Session deleted successfully" });
     } catch (error) {
-        res.status(500).json({ success: false, error: "Internal server error" });
+        res.status(500).json({ success: false, error });
     }
 }
 

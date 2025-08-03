@@ -8,7 +8,7 @@ config();
 
 const createAccount = async (req: Request, res: Response) => {
     try {
- 
+
         const parsedData = await registerSchema.safeParse(req.body);
 
         if (!parsedData.success) {
@@ -36,13 +36,13 @@ const createAccount = async (req: Request, res: Response) => {
 
         res.status(201).json({ success: true, message: "User created successfully", newUser });
     } catch (error) {
-        res.status(500).json({ success: false, error: "Internal server error" });
+        res.status(500).json({ success: false, error });
     }
 };
 
 const Login = async (req: Request, res: Response) => {
     try {
-     
+
         const parsedData = await loginSchema.safeParse(req.body);
 
         if (!parsedData.success) {
@@ -62,15 +62,15 @@ const Login = async (req: Request, res: Response) => {
         const isPasswordValid = await bcrypt.compare(parsedData.data.password, user.password);
 
         if (!isPasswordValid) {
-            res.status(401).json({ success : false, error: "Invalid credentials" });
+            res.status(401).json({ success: false, error: "Invalid credentials" });
             return
         }
 
         const token = await jwt.sign({ user }, process.env.JWT_SECRET as string, { expiresIn: "2h" });
 
-        res.status(200).json({ success: true, message: "Login successful", token , user });
+        res.status(200).json({ success: true, message: "Login successful", token, user });
     } catch (error) {
-        res.status(500).json({ success: false, error: "Internal server error" });
+        res.status(500).json({ success: false, error });
     }
 };
 

@@ -8,16 +8,18 @@ import { useEffect, useState } from 'react';
 const AllSessions = () => {
 
   const [AllSessions, setAllSessions] = useState<SessionT[]>([]);
-
+  const [loading, setLoading] = useState(false);
   const getMySessions = async () => {
     try {
-
+      setLoading(true);
       const data = await sessionService.getAllSessions();
 
       const { sessions } = data.data
       setAllSessions(sessions);
     } catch (error) {
       console.log("error", error);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -25,6 +27,18 @@ const AllSessions = () => {
     getMySessions();
   }, [])
 
+  if (loading) {
+    return (
+      <div className="h-screen flex flex-col justify-center items-center bg-gradient-to-br from-green-100 to-white">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-green-600 mb-6"></div>
+        <p className="text-xl font-semibold text-gray-700">
+          Loading, Please Wait...
+        </p>
+      </div>
+    );
+  }
+
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#E3EFD3] to-white py-8 px-4">
       <div className="max-w-7xl mx-auto">
